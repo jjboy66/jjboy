@@ -2,10 +2,145 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>欢迎来到我的GitHub页面</title>
+    <title>欢迎来到我的GitHub主页</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 0;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #39c5bb 0%, #1e90ff 100%);
+            color: #183356;
+        }
+        header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 38vh;
+            padding-top: 48px;
+        }
+        .avatar {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 16px rgba(32,32,32,0.14);
+            object-fit: cover;
+            margin-bottom: 16px;
+            background: #eee;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #fff;
+            text-shadow: 1px 2px 8px rgba(30,144,255,0.2);
+        }
+        .intro {
+            font-size: 1.3rem;
+            color: #ffffffcc;
+            margin-bottom: 22px;
+            text-align: center;
+            line-height: 1.5;
+            max-width: 430px;
+        }
+        .section {
+            background: #fff8fcf0;
+            padding: 36px 20px;
+            margin: 24px auto;
+            border-radius: 18px;
+            box-shadow: 0 2px 20px rgba(30, 144, 255, 0.09);
+            max-width: 800px;
+        }
+        .section h2 {
+            margin-top: 0;
+            font-size: 2rem;
+            color: #1e90ff;
+        }
+        .projects {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+        }
+        .project-card {
+            background: linear-gradient(120deg, #e0f7fa 0%, #faf3e3 100%);
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(120, 120, 255, 0.06);
+            padding: 22px 18px;
+            width: 235px;
+            transition: transform 0.18s cubic-bezier(.4,2,.5,.9), box-shadow 0.18s;
+            cursor: pointer;
+        }
+        .project-card:hover {
+            transform: scale(1.05) translateY(-4px);
+            box-shadow: 0 8px 24px rgba(30,144,255,0.18);
+        }
+        .project-card h3 {
+            margin-top: 0;
+            color: #39c5bb;
+        }
+        .btn-main {
+            background: linear-gradient(90deg,#39c5bb,#1e90ff 70%);
+            border: none;
+            color: #fff;
+            padding: 12px 36px;
+            font-size: 1.2rem;
+            border-radius: 38px;
+            box-shadow: 0 2px 16px rgba(30,144,255,0.14);
+            margin-top: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .btn-main:hover {
+            background: linear-gradient(90deg,#1e90ff,#39c5bb 70%);
+        }
+        @media (max-width: 700px) {
+            .section, .intro { max-width: 98vw; }
+            .projects { flex-direction: column; align-items: center; }
+        }
+    </style>
 </head>
 <body>
-    <h1>你好，欢迎访问jjboy66的GitHub仓库！</h1>
-    <p>这是一个演示用的HTML主页。</p>
+    <header>
+        <img class="avatar" src="https://avatars.githubusercontent.com/u/1152770937?v=4" alt="jjboy66 头像">
+        <h1>Hi，我是 jjboy66</h1>
+        <p class="intro">很高兴见到你！这是我的GitHub主页，分享编程乐趣与作品。探索更多，发现精彩！</p>
+        <a href="https://github.com/jjboy66" target="_blank">
+            <button class="btn-main">访问我的GitHub</button>
+        </a>
+    </header>
+    <div class="section">
+        <h2>关于我</h2>
+        <p>
+            喜欢学习新技术，热衷于Web开发与开源项目。<br>
+            擅长前端、后端编程以及解决复杂问题。<br>
+            欢迎交流、合作，一起创造美好的数字世界！
+        </p>
+    </div>
+    <div class="section">
+        <h2>精选项目</h2>
+        <div class="projects">
+            <div class="project-card" onclick="window.open('https://github.com/jjboy66/jjboy', '_blank')">
+                <h3>jjboy</h3>
+                <p>本仓库，更多内容敬请期待。点击了解源码！</p>
+            </div>
+            <div class="project-card" onclick="window.open('https://github.com/explore', '_blank')">
+                <h3>项目示例A</h3>
+                <p>这里可以列出你的主力项目，展示亮点和价值。</p>
+            </div>
+            <div class="project-card" onclick="window.open('https://github.com/explore', '_blank')">
+                <h3>项目示例B</h3>
+                <p>添加更多项目的介绍，方便访客快速了解。</p>
+            </div>
+        </div>
+    </div>
+    <div class="section" style="text-align:center;">
+        <p>感谢来访！如有兴趣合作或交流，欢迎通过GitHub联系我。</p>
+    </div>
 </body>
 </html>
