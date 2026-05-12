@@ -194,6 +194,10 @@
           .trim();
       }
 
+      function isAckConfirmed(ack) {
+        return !!(ack && !ack.err && (ack.ok || ack["#"] || ack["@"]));
+      }
+
       function createCard(id, data) {
         const li = document.createElement("li");
         li.dataset.id = id;
@@ -272,7 +276,11 @@
           updatedAt: Date.now(),
           deleted: false
         }, function (ack) {
-          setNotice(ack && ack.err ? "保存失败，请稍后重试。" : "已保存。");
+          if (ack && ack.err) {
+            setNotice("保存失败，请稍后重试。");
+            return;
+          }
+          setNotice(isAckConfirmed(ack) ? "已保存。" : "已提交，等待同步确认。");
         });
       }
 
@@ -285,7 +293,11 @@
           deleted: true,
           updatedAt: Date.now()
         }, function (ack) {
-          setNotice(ack && ack.err ? "删除失败，请稍后重试。" : "已删除。");
+          if (ack && ack.err) {
+            setNotice("删除失败，请稍后重试。");
+            return;
+          }
+          setNotice(isAckConfirmed(ack) ? "已删除。" : "已提交删除，等待同步确认。");
         });
       }
 
