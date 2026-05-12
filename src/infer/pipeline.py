@@ -14,12 +14,16 @@ from src.postprocess.temporal import TemporalSmoother
 
 
 class VisionGuardPipeline:
-    def __init__(self, confidence_threshold: float = 0.35, use_wbf: bool = True) -> None:
+    def __init__(
+        self,
+        confidence_threshold: float = 0.35,
+        suppression_strategy: str = "wbf",
+    ) -> None:
         self.detector = MockVisionGuardDetector(confidence_floor=confidence_threshold)
         self.rule_engine = RuleEngine()
         self.smoother = TemporalSmoother()
         self.confidence_threshold = confidence_threshold
-        self.use_wbf = use_wbf
+        self.suppression_strategy = suppression_strategy
 
     def decode_image_size(self, image_b64: str) -> tuple[int, int]:
         content = base64.b64decode(image_b64)
@@ -35,10 +39,14 @@ class VisionGuardPipeline:
         width, height = self.decode_image_size(image_b64)
         detections = self.detector.detect(width, height, source_id=source_id, frame_index=frame_index)
         detections = filter_by_score(detections, threshold=self.confidence_threshold)
-        detections = soft_nms(detections, iou_threshold=0.5, sigma=0.5)
-        if self.use_wbf:
+
+        if self.suppression_strategy == "wbf":
             detections = weighted_boxes_fusion(detections)
-        detections = nms(detections, iou_threshold=0.45)
+        elif self.suppression_strategy == "soft_nms":
+            detections = soft_nms(detections, iou_threshold=0.5, sigma=0.5)
+        else:
+            detections = nms(detections, iou_threshold=0.45)
+
         detections = self.smoother.smooth(detections)
 
         alerts = self.rule_engine.evaluate(detections, source_id=source_id)
