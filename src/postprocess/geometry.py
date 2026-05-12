@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Iterable, List, Sequence, Tuple
 
 from src.models.detector import BBox, Detection
@@ -59,7 +60,7 @@ def soft_nms(
         for det in mutable:
             overlap = iou(best.bbox, det.bbox)
             if overlap > iou_threshold:
-                decay = 2.718281828 ** (-(overlap * overlap) / max(sigma, EPS))
+                decay = math.exp(-(overlap * overlap) / max(sigma, EPS))
                 det.score *= decay
             if det.score >= min_score:
                 next_round.append(det)
