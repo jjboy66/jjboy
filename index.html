@@ -147,9 +147,14 @@
   <script>
     (function () {
       const RECORD_KEY = "shared-dialogue-record";
+      const DEFAULT_PEERS = [
+        "https://peer.wallie.io/gun",
+        "https://gun-manhattan.herokuapp.com/gun"
+      ];
       const configuredPeer = new URLSearchParams(window.location.search).get("peer");
+      const peers = configuredPeer ? [configuredPeer] : DEFAULT_PEERS;
       const gun = window.GUN
-        ? (configuredPeer ? window.GUN({ peers: [configuredPeer] }) : window.GUN())
+        ? window.GUN({ peers })
         : null;
 
       const listEl = document.getElementById("list");
@@ -187,6 +192,10 @@
           .replace(/</g, "＜")
           .replace(/>/g, "＞")
           .trim();
+      }
+
+      function isAckConfirmed(ack) {
+        return !!(ack && !ack.err && (ack.ok || ack["#"] || ack["@"]));
       }
 
       function createCard(id, data) {
@@ -257,12 +266,21 @@
         }
         const safeName = sanitizeInput(name);
         const safeText = sanitizeInput(text);
-        if (!safeText) return;
+        if (!safeText) {
+          setNotice("对话内容不能为空。");
+          return;
+        }
         gun.get(RECORD_KEY).get(id).put({
           name: safeName,
           text: safeText,
           updatedAt: Date.now(),
           deleted: false
+        }, function (ack) {
+          if (ack && ack.err) {
+            setNotice("保存失败，请稍后重试。");
+            return;
+          }
+          setNotice(isAckConfirmed(ack) ? "已保存。" : "已提交，等待同步确认。");
         });
       }
 
@@ -274,6 +292,12 @@
         gun.get(RECORD_KEY).get(id).put({
           deleted: true,
           updatedAt: Date.now()
+        }, function (ack) {
+          if (ack && ack.err) {
+            setNotice("删除失败，请稍后重试。");
+            return;
+          }
+          setNotice(isAckConfirmed(ack) ? "已删除。" : "已提交删除，等待同步确认。");
         });
       }
 
