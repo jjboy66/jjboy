@@ -143,7 +143,7 @@
     </section>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+  <script src="./vendor/gun.js"></script>
   <script>
     (function () {
       const RECORD_KEY = "shared-dialogue-record";
@@ -174,6 +174,14 @@
         if (!ts) return "";
         const d = new Date(ts);
         return Number.isNaN(d.getTime()) ? "" : d.toLocaleString();
+      }
+
+      function sanitizeInput(value) {
+        return String(value || "")
+          .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+          .replace(/</g, "＜")
+          .replace(/>/g, "＞")
+          .trim();
       }
 
       function createCard(id, data) {
@@ -242,10 +250,12 @@
           setNotice("实时服务不可用，暂时无法保存。");
           return;
         }
-        if (!text.trim()) return;
+        const safeName = sanitizeInput(name);
+        const safeText = sanitizeInput(text);
+        if (!safeText) return;
         gun.get(RECORD_KEY).get(id).put({
-          name: (name || "").trim(),
-          text: text.trim(),
+          name: safeName,
+          text: safeText,
           updatedAt: Date.now(),
           deleted: false
         });
@@ -285,7 +295,7 @@
         if (target.classList.contains("save")) {
           const name = li.querySelector(".edit-name");
           const text = li.querySelector(".edit-text");
-          saveEntry(id, name?.value ?? "", text?.value ?? "");
+          saveEntry(id, name ? name.value : "", text ? text.value : "");
         }
 
         if (target.classList.contains("delete")) {
@@ -303,6 +313,7 @@
       }
 
       gun.get(RECORD_KEY).map().on(function (data, key) {
+        // GunDB map 会返回一个 "_" 元信息节点，这里仅处理真实记录节点。
         if (!data || key === "_") return;
         if (data.deleted) {
           entries.delete(key);
