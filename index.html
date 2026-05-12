@@ -147,9 +147,14 @@
   <script>
     (function () {
       const RECORD_KEY = "shared-dialogue-record";
+      const DEFAULT_PEERS = [
+        "https://peer.wallie.io/gun",
+        "https://gun-manhattan.herokuapp.com/gun"
+      ];
       const configuredPeer = new URLSearchParams(window.location.search).get("peer");
+      const peers = configuredPeer ? [configuredPeer] : DEFAULT_PEERS;
       const gun = window.GUN
-        ? (configuredPeer ? window.GUN({ peers: [configuredPeer] }) : window.GUN())
+        ? window.GUN({ peers })
         : null;
 
       const listEl = document.getElementById("list");
@@ -257,12 +262,17 @@
         }
         const safeName = sanitizeInput(name);
         const safeText = sanitizeInput(text);
-        if (!safeText) return;
+        if (!safeText) {
+          setNotice("对话内容不能为空。");
+          return;
+        }
         gun.get(RECORD_KEY).get(id).put({
           name: safeName,
           text: safeText,
           updatedAt: Date.now(),
           deleted: false
+        }, function (ack) {
+          setNotice(ack && ack.err ? "保存失败，请稍后重试。" : "已保存。");
         });
       }
 
@@ -274,6 +284,8 @@
         gun.get(RECORD_KEY).get(id).put({
           deleted: true,
           updatedAt: Date.now()
+        }, function (ack) {
+          setNotice(ack && ack.err ? "删除失败，请稍后重试。" : "已删除。");
         });
       }
 
