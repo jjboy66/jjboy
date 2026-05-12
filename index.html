@@ -42,6 +42,13 @@
       font-size: 0.95rem;
     }
 
+    .notice {
+      margin: 0 0 12px;
+      color: var(--danger);
+      font-size: 0.9rem;
+      min-height: 1.25rem;
+    }
+
     .panel {
       background: var(--panel);
       border: 1px solid var(--line);
@@ -121,6 +128,7 @@
   <main class="wrap">
     <h1>共享对话记录</h1>
     <p class="desc">任何访问者都可以新增、编辑和删除记录（实时共享）。</p>
+    <p id="notice" class="notice" role="status" aria-live="polite"></p>
 
     <section class="panel composer" aria-label="新增对话">
       <input id="newName" type="text" maxlength="40" placeholder="你的名字（可选）" />
@@ -138,6 +146,7 @@
   <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
   <script>
     (function () {
+      const RECORD_KEY = "shared-dialogue-record";
       const peers = [
         "https://gun-manhattan.herokuapp.com/gun",
         "https://gunjs.herokuapp.com/gun"
@@ -147,8 +156,20 @@
       const listEl = document.getElementById("list");
       const newNameEl = document.getElementById("newName");
       const newTextEl = document.getElementById("newText");
+      const noticeEl = document.getElementById("notice");
       const addBtn = document.getElementById("addBtn");
       const entries = new Map();
+
+      function setNotice(message) {
+        noticeEl.textContent = message || "";
+      }
+
+      function createId() {
+        if (window.crypto && typeof window.crypto.randomUUID === "function") {
+          return window.crypto.randomUUID();
+        }
+        return String(Date.now()) + "-" + Math.random().toString(36).slice(2, 10);
+      }
 
       function formatTime(ts) {
         if (!ts) return "";
@@ -219,7 +240,7 @@
 
       function saveEntry(id, name, text) {
         if (!gun || !text.trim()) return;
-        gun.get("shared-dialogue-record").get(id).put({
+        gun.get(RECORD_KEY).get(id).put({
           name: (name || "").trim(),
           text: text.trim(),
           updatedAt: Date.now(),
@@ -229,7 +250,7 @@
 
       function deleteEntry(id) {
         if (!gun) return;
-        gun.get("shared-dialogue-record").get(id).put({
+        gun.get(RECORD_KEY).get(id).put({
           deleted: true,
           updatedAt: Date.now()
         });
@@ -238,10 +259,11 @@
       addBtn.addEventListener("click", function () {
         const text = newTextEl.value.trim();
         if (!text) {
-          alert("请先输入对话内容。");
+          setNotice("请先输入对话内容。");
           return;
         }
-        const id = String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8);
+        setNotice("");
+        const id = createId();
         saveEntry(id, newNameEl.value, text);
         newTextEl.value = "";
       });
@@ -273,7 +295,7 @@
         return;
       }
 
-      gun.get("shared-dialogue-record").map().on(function (data, key) {
+      gun.get(RECORD_KEY).map().on(function (data, key) {
         if (!data || key === "_") return;
         if (data.deleted) {
           entries.delete(key);
