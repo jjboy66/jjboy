@@ -147,11 +147,10 @@
   <script>
     (function () {
       const RECORD_KEY = "shared-dialogue-record";
-      const peers = [
-        "https://gun-manhattan.herokuapp.com/gun",
-        "https://gunjs.herokuapp.com/gun"
-      ];
-      const gun = window.GUN ? window.GUN({ peers }) : null;
+      const configuredPeer = new URLSearchParams(window.location.search).get("peer");
+      const gun = window.GUN
+        ? (configuredPeer ? window.GUN({ peers: [configuredPeer] }) : window.GUN())
+        : null;
 
       const listEl = document.getElementById("list");
       const newNameEl = document.getElementById("newName");
@@ -239,7 +238,11 @@
       }
 
       function saveEntry(id, name, text) {
-        if (!gun || !text.trim()) return;
+        if (!gun) {
+          setNotice("实时服务不可用，暂时无法保存。");
+          return;
+        }
+        if (!text.trim()) return;
         gun.get(RECORD_KEY).get(id).put({
           name: (name || "").trim(),
           text: text.trim(),
@@ -249,7 +252,10 @@
       }
 
       function deleteEntry(id) {
-        if (!gun) return;
+        if (!gun) {
+          setNotice("实时服务不可用，暂时无法删除。");
+          return;
+        }
         gun.get(RECORD_KEY).get(id).put({
           deleted: true,
           updatedAt: Date.now()
@@ -279,7 +285,7 @@
         if (target.classList.contains("save")) {
           const name = li.querySelector(".edit-name");
           const text = li.querySelector(".edit-text");
-          saveEntry(id, name ? name.value : "", text ? text.value : "");
+          saveEntry(id, name?.value ?? "", text?.value ?? "");
         }
 
         if (target.classList.contains("delete")) {
@@ -288,6 +294,7 @@
       });
 
       if (!gun) {
+        setNotice("实时服务加载失败，请检查网络后刷新页面。");
         const err = document.createElement("li");
         err.className = "meta";
         err.textContent = "实时服务加载失败，请检查网络后刷新页面。";
