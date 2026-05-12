@@ -167,7 +167,12 @@
         if (window.crypto && typeof window.crypto.randomUUID === "function") {
           return window.crypto.randomUUID();
         }
-        return String(Date.now()) + "-" + Math.random().toString(36).slice(2, 10);
+        if (window.crypto && typeof window.crypto.getRandomValues === "function") {
+          const bytes = new Uint8Array(16);
+          window.crypto.getRandomValues(bytes);
+          return Array.from(bytes, b => b.toString(16).padStart(2, "0")).join("");
+        }
+        return String(Date.now()) + "-" + Math.random().toString(36).slice(2, 14);
       }
 
       function formatTime(ts) {
@@ -313,7 +318,8 @@
       }
 
       gun.get(RECORD_KEY).map().on(function (data, key) {
-        // GunDB map 会返回一个 "_" 元信息节点，这里仅处理真实记录节点。
+        // GunDB 在 map() 中会带上内部元信息节点 "_"（含 soul/状态等元数据），
+        // 该节点不是业务记录，因此需要显式跳过，仅处理真实对话数据。
         if (!data || key === "_") return;
         if (data.deleted) {
           entries.delete(key);
