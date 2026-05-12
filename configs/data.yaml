@@ -1,0 +1,16 @@
+dataset:
+  train_manifest: data/annotations/train.jsonl
+  val_manifest: data/annotations/val.jsonl
+  class_names:
+    - person
+    - helmet
+    - bag
+    - forklift
+  scene_tags:
+    - day
+    - night
+    - occlusion
+    - small_object
+active_learning:
+  low_confidence_threshold: 0.45
+  feedback_store: data/annotations/feedback.jsonl
